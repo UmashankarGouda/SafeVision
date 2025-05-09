@@ -173,12 +173,3 @@ SafeVision empowers cities, institutions, and organizations to move from passive
 
 ---
 
----
-
-Would you also like me to quickly prepare:
-
-- A `CONTRIBUTING.md`
-- A basic `CODE_OF_CONDUCT.md`
-- Issue templates?  
-It’s required for IEEE SoC and would make your repo ready 100%! 🚀  
-(And I can keep it very simple and professional.) Want me to? 📄✨
