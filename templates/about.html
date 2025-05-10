@@ -1,0 +1,206 @@
+{% extends 'layout.html' %} {% block title %}About SafeVision{% endblock %} {%
+block css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/about.css') }}"
+/>
+{% endblock %} {% block content %}
+<section class="about-hero">
+  <div class="about-container">
+    <h1>About <span class="highlight">SafeVision</span></h1>
+    <p class="lead">AI-Powered Surveillance for a Safer World</p>
+  </div>
+</section>
+
+<section class="about-mission">
+  <div class="container">
+    <div class="row">
+      <div class="col-left">
+        <h2>Our Mission</h2>
+        <p>
+          SafeVision is dedicated to creating safer environments through
+          advanced AI-powered surveillance technology. We believe in proactive
+          safety measures that can detect and prevent dangerous situations
+          before they escalate.
+        </p>
+        <p>
+          By leveraging cutting-edge computer vision and machine learning
+          algorithms, our system can identify potential assault patterns and
+          alert security personnel in real-time, potentially saving lives and
+          preventing harm.
+        </p>
+      </div>
+      <div class="col-right">
+        <div class="image-container">
+          <img
+            src="{{ url_for('static', filename='images/mission.jpg') }}"
+            alt="SafeVision Mission"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about-technology">
+  <div class="container">
+    <h2>Our Technology</h2>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="tech-icon">
+          <i class="fas fa-brain"></i>
+        </div>
+        <h3>AI Detection</h3>
+        <p>
+          Advanced neural networks trained to recognize patterns of aggressive
+          behavior and potential assault scenarios with high accuracy.
+        </p>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">
+          <i class="fas fa-video"></i>
+        </div>
+        <h3>Real-time Monitoring</h3>
+        <p>
+          Continuous analysis of video feeds with minimal latency ensures
+          immediate detection and response to potentially dangerous situations.
+        </p>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">
+          <i class="fas fa-bell"></i>
+        </div>
+        <h3>Alert System</h3>
+        <p>
+          Sophisticated notification protocols that alert security personnel
+          through multiple channels when suspicious activity is detected.
+        </p>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h3>Privacy Protection</h3>
+        <p>
+          Built with privacy in mind, our system focuses on behavior patterns
+          rather than individual identification, and all data is handled with
+          strict security protocols.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about-team">
+  <div class="container">
+    <h2>Meet Our Team</h2>
+    <div class="team-grid">
+      <div class="team-member">
+        <div class="member-image">
+          <img
+            src="{{ url_for('static', filename='images/team/member1.jpg') }}"
+            alt="Team Member"
+          />
+        </div>
+        <h3>Jane Doe</h3>
+        <p class="member-title">AI Research Lead</p>
+        <p class="member-bio">
+          PhD in Computer Vision with 10+ years of experience in developing
+          surveillance systems.
+        </p>
+      </div>
+      <div class="team-member">
+        <div class="member-image">
+          <img
+            src="{{ url_for('static', filename='images/team/member2.jpg') }}"
+            alt="Team Member"
+          />
+        </div>
+        <h3>John Smith</h3>
+        <p class="member-title">Security Expert</p>
+        <p class="member-bio">
+          Former law enforcement officer specializing in preventative security
+          measures.
+        </p>
+      </div>
+      <div class="team-member">
+        <div class="member-image">
+          <img
+            src="{{ url_for('static', filename='images/team/member3.jpg') }}"
+            alt="Team Member"
+          />
+        </div>
+        <h3>Alex Johnson</h3>
+        <p class="member-title">Software Architect</p>
+        <p class="member-bio">
+          15+ years of experience designing secure, scalable software solutions.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about-values">
+  <div class="container">
+    <h2>Our Core Values</h2>
+    <div class="values-container">
+      <div class="value">
+        <h3>Safety</h3>
+        <p>
+          We believe everyone deserves to feel safe in public and private
+          spaces.
+        </p>
+      </div>
+      <div class="value">
+        <h3>Innovation</h3>
+        <p>
+          We continuously push the boundaries of what's possible with AI
+          surveillance technology.
+        </p>
+      </div>
+      <div class="value">
+        <h3>Privacy</h3>
+        <p>
+          We design our systems with privacy as a fundamental requirement, not
+          an afterthought.
+        </p>
+      </div>
+      <div class="value">
+        <h3>Responsibility</h3>
+        <p>
+          We recognize the power of AI and use it ethically and responsibly.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about-contact">
+  <div class="container">
+    <h2>Get In Touch</h2>
+    <p class="contact-lead">
+      Interested in learning more about SafeVision or implementing our solution
+      in your organization?
+    </p>
+    <div class="contact-options">
+      <div class="contact-option">
+        <i class="fas fa-envelope"></i>
+        <p>info@safevision.com</p>
+      </div>
+      <div class="contact-option">
+        <i class="fas fa-phone"></i>
+        <p>+1 (555) 123-4567</p>
+      </div>
+      <div class="contact-option">
+        <i class="fas fa-map-marker-alt"></i>
+        <p>123 Tech Blvd, Innovation City</p>
+      </div>
+    </div>
+    <div class="contact-action">
+      <a href="/contact" class="btn btn-primary">Contact Us</a>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/about.js') }}"></script>
+{% endblock %}

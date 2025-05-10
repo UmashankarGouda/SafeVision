@@ -1,129 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SafeVision</title>
+{% extends 'layout.html' %}
 
-    <!-- CSS Files -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/common.css') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/home.css') }}"
-    />
+{% block title %}SafeVision - AI-Powered Surveillance{% endblock %}
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@100..900&family=Roboto:wght@100..900&family=Smooch+Sans:wght@100..900&family=VT323&display=swap"
-      rel="stylesheet"
-    />
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}" />
+{% endblock %}
 
-    <!-- FontAwesome -->
-    <script
-      src="https://kit.fontawesome.com/57a0898944.js"
-      crossorigin="anonymous"
-    ></script>
-  </head>
-  <body>
-    <!-- Preloader -->
-    <div id="preloader">
-      <div class="loader"></div>
-    </div>
+{% block head_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="{{ url_for('static', filename='js/BokehShader.js') }}"></script>
+{% endblock %}
 
-    <nav id="navbar">
-      <div class="nav-container">
-        <div class="logo">
-          <a href="{{ url_for('home') }}">SafeVision</a>
-        </div>
-      </div>
-    </nav>
-    <section class="hero" id="hero">
-      <div class="hero-content" id="hero-content">
-        <h1 id="hero-content-h1">
-          Detecting Danger Before It <span id="home-h1-strikes">Strikes.</span>
-        </h1>
-      </div>
-    </section>
-    <div class="video-container">
-      <img
-        src="{{ url_for('surveillance.video_feed')}}"
-        width="640"
-        height="480"
-      />
-    </div>
-    <div class="metrics">
-      <div class="circle-container">
-        <svg width="150" height="150" viewBox="0 0 100 100">
-          <circle
-            cx="50"
-            cy="50"
-            r="40"
-            stroke="#ddd"
-            stroke-width="10"
-            fill="none"
-          ></circle>
-          <circle
-            id="progress"
-            cx="50"
-            cy="50"
-            r="40"
-            stroke="#00b5e2"
-            stroke-width="10"
-            fill="none"
-            stroke-linecap="round"
-            stroke-dasharray="251.2"
-            stroke-dashoffset="251.2"
-          ></circle>
-        </svg>
-        <div class="percentage-text" id="percentage">0%</div>
-        <div class="title">Confidence Level</div>
-      </div>
-    </div>
-    <script>
-      function setConfidenceLevel(value) {
-        const circle = document.getElementById("progress");
-        const text = document.getElementById("percentage");
-        const maxOffset = 251.2;
-        const offset = maxOffset - (value / 100) * maxOffset;
-        circle.style.strokeDashoffset = offset;
-        text.textContent = value + "%";
-      }
+{% block content %}
+<section class="hero" id="hero">
+  <div class="hero-content" id="hero-content">
+    <h1 id="hero-content-h1">
+      Detecting Danger Before It <span id="home-h1-strikes">Strikes.</span>
+    </h1>
+  </div>
+</section>
 
-      function fetchConfidenceLevel() {
-        fetch("/get_confidence")
-          .then((response) => response.json())
-          .then((data) => {
-            setConfidenceLevel(data.confidence_level);
-          })
-          .catch((error) =>
-            console.error("Error fetching confidence level:", error)
-          );
-      }
+{% include 'components/video-feed.html' %}
+{% include 'components/confidence-meter.html' %}
+{% endblock %}
 
-      // Fetch confidence level every 5 seconds
-      setInterval(fetchConfidenceLevel, 3000);
-
-      // Initial fetch when the page loads
-      fetchConfidenceLevel();
-    </script>
-  </body>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-  <script src="{{ url_for('static', filename='js/BokehShader.js') }}"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
-
-  <script src="{{ url_for('static', filename='js/animation.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
+<script src="{{ url_for('static', filename='js/animation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}
 </html>

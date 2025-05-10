@@ -1,10 +1,11 @@
-"""SafeVision - AI-Powered Intelligent Surveillance for Assault Prevention.
-Main application entry point."""
+"""
+    SafeVision - AI-Powered Intelligent Surveillance for Assault Prevention.
+    Main application entry point.
+"""
 
 from flask import Flask
 import config
-from routes.surveillance_routes import surveillance_bp
-from views.home_view import home_view
+from routes import pages_bp, surveillance_bp
 
 def create_app():
     """
@@ -17,15 +18,15 @@ def create_app():
     
     # Register blueprints
     app.register_blueprint(surveillance_bp)
-    
-    @app.route('/')
-    def home():
-        return home_view()
+    app.register_blueprint(pages_bp)
     
     return app
 
-# Create the Flask application
-app = create_app()
 
 if __name__ == '__main__':
-    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG,reload=True)
+    """
+        Main entry point for the application.
+        Starts the Flask development server.
+    """
+    app = create_app()
+    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)

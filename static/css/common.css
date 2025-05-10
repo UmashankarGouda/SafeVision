@@ -1,0 +1,94 @@
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0);
+  backdrop-filter: blur(8px);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.nav-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.logo img {
+  height: 50px;
+  width: auto;
+}
+.logo a {
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: white;
+}
+
+@font-face {
+  font-family: "Electrohormonix";
+  src: url("../fonts/electroharmonix.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "joystix";
+  src: url("../fonts/joystix monospace.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* General Styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--dark-bg);
+  color: #ffffff;
+}
+:root {
+  --primary-color: #00b5e2;
+  --secondary-color: #00629b;
+  --dark-bg: #060606;
+  --dark-bright-bg: #101010;
+  --dark-bright-bg-nav: rgba(16, 16, 16, 0.9);
+  --hero-font: "Doto";
+  --padding-card: 16px;
+}
+
+.logo {
+  color: var(--primary-color);
+}
+
+.nav-links > ul {
+  display: flex;
+  gap: 20px;
+}
+.nav-links > ul > li {
+  list-style: none;
+  display: inline-block;
+  margin: 0 10px;
+  padding: 10px 20px;
+}
+.nav-links > ul > li > a {
+  text-decoration: none;
+  color: white;
+  font-size: 1.2rem;
+  transition: color 0.3s ease-in-out;
+}
