@@ -1,101 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SafeVision</title>
 
     <!-- CSS Files -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/common.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/home.css') }}"
+    />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100..900&family=Roboto:wght@100..900&family=Smooch+Sans:wght@100..900&family=VT323&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- FontAwesome -->
-    <script src="https://kit.fontawesome.com/57a0898944.js" crossorigin="anonymous"></script>
-</head>
-<body>
-      <!-- Preloader -->
-<div id="preloader">
-  <div class="loader"></div>
-</div>
+    <script
+      src="https://kit.fontawesome.com/57a0898944.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- Three.js Background Canvas -->
+    <canvas id="three-background"></canvas>
 
-    <nav id="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <a href="{{ url_for('home') }}">SafeVision</a>
-            </div>
+    <!-- Preloader -->
+    <div
+      id="preloader"
+      class="d-flex justify-content-center align-items-center"
+    >
+      <div class="loader"></div>
+    </div>
 
-        </div>
+    <!-- Navbar -->
+    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('home') }}">SafeVision</a>
+      </div>
     </nav>
-    <section class="hero" id="hero">
-      <div class="hero-content" id="hero-content">
-        <h1 id="hero-content-h1">
-          Detecting Danger Before It <span id="home-h1-strikes">Strikes.</span>
-        </h1> 
-        
+
+    <!-- Hero Section -->
+    <section class="hero text-center py-5 relative">
+      <h1>
+        Detecting Danger Before It
+        <span class="text-primary" style="color: red">Strikes.</span>
+      </h1>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+      <div class="row justify-content-center">
+        <!-- Live Video Stream -->
+        <div class="col-md-6 mb-4">
+          <div class="video-container">
+            <img
+              id="video-feed"
+              src="{{ url_for('video_feed') }}"
+              class="img-fluid"
+              alt="Live Video Feed"
+            />
+          </div>
+        </div>
+
+        <!-- Metrics and Behaviors -->
+        <div class="col-md-6">
+          <div class="metrics text-center mb-4">
+            <div class="circle-container">
+              <svg width="150" height="150" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  stroke="#ddd"
+                  stroke-width="10"
+                  fill="none"
+                ></circle>
+                <circle
+                  id="progress"
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  stroke="#00b5e2"
+                  stroke-width="10"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-dasharray="251.2"
+                  stroke-dashoffset="251.2"
+                ></circle>
+              </svg>
+              <div class="percentage-text" id="percentage">0%</div>
+              <div class="title">Confidence Level</div>
+            </div>
+          </div>
+
+          <div class="behaviors">
+            <h3>Detected Behaviors:</h3>
+            <ul id="behavior-list"></ul>
+          </div>
+        </div>
       </div>
 
-    </section>
-    <div class="video-container">
-      <img src="{{ url_for('video_feed')}}" width="640" height="480" />  
+      <!-- Video Upload Section -->
+      <div class="upload-section text-center mt-5">
+        <h3>Upload a Video for Behavior Analysis</h3>
+        <form
+          id="upload-form"
+          enctype="multipart/form-data"
+          class="d-inline-block"
+        >
+          <input
+            type="file"
+            id="video-input"
+            name="video"
+            accept="video/*"
+            required
+          />
+          <button type="submit" class="btn btn-primary">
+            Upload and Analyze
+          </button>
+        </form>
+        <video
+          id="uploaded-video"
+          controls
+          class="mt-3"
+          style="display: none; width: 100%; max-width: 640px"
+        ></video>
+        <div id="upload-status" class="mt-2"></div>
+      </div>
     </div>
-    <div class="metrics">
-      <div class="circle-container">
-        <svg width="150" height="150" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="40" stroke="#ddd" stroke-width="10" fill="none"></circle>
-            <circle id="progress" cx="50" cy="50" r="40" stroke="#00b5e2" stroke-width="10" fill="none"
-                    stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
-        </svg>
-        <div class="percentage-text" id="percentage">0%</div>
-        <div class="title">Confidence Level</div>
-    </div>
-    </div>
-  <script>
+    <!-- Scripts -->
+    <script>
       function setConfidenceLevel(value) {
         const circle = document.getElementById("progress");
         const text = document.getElementById("percentage");
-        const maxOffset = 251.2; 
+        const maxOffset = 251.2;
         const offset = maxOffset - (value / 100) * maxOffset;
         circle.style.strokeDashoffset = offset;
         text.textContent = value + "%";
-    }
+      }
 
-    function fetchConfidenceLevel() {
-        fetch('/get_confidence')
-            .then(response => response.json())
-            .then(data => {
-                setConfidenceLevel(data.confidence_level);
-            })
-            .catch(error => console.error('Error fetching confidence level:', error));
-    }
+      function updateBehaviors(behaviors) {
+        const list = document.getElementById("behavior-list");
+        list.innerHTML = "";
+        behaviors.forEach((behavior) => {
+          const li = document.createElement("li");
+          li.textContent = behavior;
+          list.appendChild(li);
+        });
+      }
 
-    // Fetch confidence level every 5 seconds
-    setInterval(fetchConfidenceLevel, 3000);
+      function fetchMetrics() {
+        fetch("/get_metrics")
+          .then((res) => res.json())
+          .then((data) => {
+            // Check if confidence_level exists in the response
+            if (data.confidence_level !== undefined) {
+              setConfidenceLevel(data.confidence_level);
+            } else {
+              console.error("Confidence level is undefined in the response");
+            }
 
-    // Initial fetch when the page loads
-    fetchConfidenceLevel();
-  </script>
+            if (data.behaviors) {
+              updateBehaviors(data.behaviors);
+            } else {
+              console.error("Behaviors are undefined in the response");
+            }
+          })
+          .catch((err) => console.error("Metrics fetch error:", err));
+      }
 
-    
+      setInterval(fetchMetrics, 3000);
+      fetchMetrics(); // Initial fetch
 
+      // Upload logic
+      const form = document.getElementById("upload-form");
+      const videoInput = document.getElementById("video-input");
+      const videoPreview = document.getElementById("uploaded-video");
+      const uploadStatus = document.getElementById("upload-status");
 
-</body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-  <script src="{{ url_for('static', filename='js/BokehShader.js') }}"></script>
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const file = videoInput.files[0];
+        if (!file) return;
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
+        const formData = new FormData();
+        formData.append("video", file);
 
-<script src="{{ url_for('static', filename='js/animation.js') }}"></script>
-<script src="{{ url_for('static', filename='js/common.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+        uploadStatus.textContent = "Uploading...";
+        videoPreview.style.display = "none";
+
+        fetch("/upload_video", {
+          method: "POST",
+          body: formData,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            uploadStatus.textContent = data.message;
+            if (data.success) {
+              videoPreview.src = URL.createObjectURL(file);
+              videoPreview.style.display = "block";
+            }
+          })
+          .catch((err) => {
+            uploadStatus.textContent = "Upload failed.";
+            console.error(err);
+          });
+      });
+    </script>
+
+    <!-- 3D Effects and Other Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="{{ url_for('static', filename='js/BokehShader.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
+
+    <script src="{{ url_for('static', filename='js/animation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+  </body>
 </html>
