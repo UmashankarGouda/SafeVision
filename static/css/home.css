@@ -34,7 +34,6 @@ body {
   --padding-card: 16px;
 }
 
-
 .logo {
   color: var(--primary-color);
 }
@@ -74,7 +73,7 @@ nav {
   height: 50px;
   width: auto;
 }
-.logo a{
+.logo a {
   font-size: 1.5rem;
   text-decoration: none;
   color: white;
@@ -92,6 +91,16 @@ nav {
   color: #ffffff;
   background: #060606;
   overflow: hidden;
+}
+
+.hero h1 {
+  font-size: 5rem;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+  position: absolute;
+  left: 100px;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-style: italic;
 }
 
 /* Hero Content */
@@ -165,7 +174,7 @@ nav {
   gap: 20px;
 }
 
-.btn{
+.btn {
   padding: 12px 24px;
   font-size: 1.2rem;
   font-weight: bold;
@@ -192,7 +201,7 @@ nav {
 }
 
 /* First button */
-.btn:first-child{
+.btn:first-child {
   background: var(--secondary-color); /* Blue color */
 }
 
@@ -202,11 +211,11 @@ nav {
 }
 
 /* Button Hover Effect */
-.btn:hover{
+.btn:hover {
   transform: scale(1.1);
   filter: brightness(1.2);
 }
-.video-container{
+.video-container {
   z-index: 2;
   opacity: 1;
   display: flex;
@@ -216,7 +225,7 @@ nav {
   align-items: center;
 }
 
-.video-container img{
+.video-container img {
   z-index: 100;
   border-radius: 2rem;
   margin-bottom: 50px;
@@ -270,14 +279,11 @@ nav ul li a:hover {
   transform: scale(1.1); /* Scale up */
 }
 
-
-
 /* Responsive Design */
 @media (max-width: 768px) {
-  
 }
 
-.footer{
+.footer {
   background-color: var(--dark-bright-bg);
 }
 .overview-section {
@@ -306,7 +312,7 @@ nav ul li a:hover {
   color: white;
   margin-bottom: 15px;
 }
-.text-content-p{
+.text-content-p {
   width: max-content;
 }
 
@@ -332,12 +338,12 @@ nav ul li a:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-#text-content-p-1{
+#text-content-p-1 {
   padding-left: 3rem;
 }
 
-.metrics{
-  display:flex;
+.metrics {
+  display: flex;
   justify-content: center;
   margin-bottom: 50px;
 }
@@ -366,22 +372,21 @@ svg {
   margin-bottom: 50px;
 }
 
-
 #face {
   width: 200px;
   flex: 2;
 }
 
-#face img{
+#face img {
   max-width: 50%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.text-content-blah{
+.text-content-blah {
   width: 80%;
 }
 
-.left-blah{
+.left-blah {
   width: 60%;
 }
 

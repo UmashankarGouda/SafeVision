@@ -1,19 +1,14 @@
-from flask import Flask, render_template, Response, jsonify
+from flask import Flask, render_template, Response, jsonify, request
 import cv2
 import socket
 import struct
 import pickle
-import cv2
-import torch
 import os
 import time
 import numpy as np
 from ultralytics import YOLO
 from transformers import pipeline
 from PIL import Image
-import socket
-import struct
-import pickle
 import random
 
 # Create folders to save images
@@ -119,8 +114,6 @@ class BehaviorClassificationModel:
             area = cv2.contourArea(cnt)
             if area > 5000:  # Significant skin area
                 hx, hy, hw, hh = cv2.boundingRect(cnt)
-                # Draw hand region (commented out to avoid modifying the original frame)
-                # cv2.rectangle(person_frame, (hx, hy), (hx + hw, hy + hh), (0, 255, 0), 2)
                 if hy < (y2 - y1) // 2:  # If hand is in upper half of person region
                     behaviors.append("Hands Raised")
         
@@ -160,16 +153,11 @@ class IntegratedSurveillanceSystem:
         for i, box in enumerate(people_data['boxes']):
             x1, y1, x2, y2 = box
             person_frame = frame[y1:y2, x1:x2].copy()  # Copy to avoid modifying original
-            
-            # Skip if person crop is empty
             if person_frame.size == 0:
                 behaviors.append(f"Person {i+1}: Not fully visible")
                 continue
-                
             behavior = self.behavior_classifier.classify_behavior(frame, i, box)
             behaviors.append(f"Person {i+1}: {behavior}")
-            
-            # Check if this is an interesting behavior to save
             if behavior != "Normal":
                 behavior_detected = True
 
@@ -180,105 +168,98 @@ class IntegratedSurveillanceSystem:
             'behavior_detected': behavior_detected
         }
 
-
+# Flask App
 app = Flask(__name__)
 
+# Make sure this global variable is declared at the top of your file
+latest_analysis = {
+    'people_count': 0,
+    'behaviors': [],
+    'people_boxes': [],
+    'behavior_detected': False
+}
+
+# Video frame generator
 def generate_frames():
-    SAVE_INTERVAL = 10*60  # Save images every 10 minutes
-    
+    global latest_analysis
+    SAVE_INTERVAL = 10 * 60
     analyzer = IntegratedSurveillanceSystem(save_interval=SAVE_INTERVAL)
-    cap = cv2.VideoCapture(0)  # Open webcam
-    
-    print(f"Starting integrated surveillance. Saving only panicked behavior frames.")
-    
-    """ Capture frames from OpenCV and yield them as a stream """
+    cap = cv2.VideoCapture(0)
+
     while True:
-        
         ret, frame = cap.read()
         if not ret:
             print("Error: Could not read frame.")
             break
-        
+
         # Analyze frame
-        analysis = analyzer.analyze_frame(frame, save_images=False)  # Disable automatic saving
-        
-        # Print people count and behaviors
-        print(f"People Count: {analysis['people_count']}")
-        for behavior in analysis['behaviors']:
-            print(f"Behavior: {behavior}")
-        
-        # Manually save frame only if panicked behavior is detected
+        analysis = analyzer.analyze_frame(frame, save_images=False)
+
+        # 🔄 Update global variable for frontend API
+        latest_analysis = analysis
+
+        # Save frame if panicked behavior detected
         if any('Panicked' in behavior for behavior in analysis['behaviors']):
             file_path = os.path.join(SAVE_DIR, f"panicked_surveillance_{int(time.time())}.jpg")
             cv2.imwrite(file_path, frame)
-            print("Panicked behavior detected! Frame saved.")
 
         # Draw bounding boxes and labels
         for i, (x1, y1, x2, y2) in enumerate(analysis['people_boxes']):
-            # Use different colors for different behavior states
-            if "Panicked" in analysis['behaviors'][i]:
-                color = (0, 0, 255)  # Red for panicked
-            elif "Normal" in analysis['behaviors'][i]:
-                color = (0, 255, 0)  # Green for normal
-            else:
-                color = (255, 255, 0)  # Yellow for other behaviors
-                
+            color = (0, 255, 0) if "Normal" in analysis['behaviors'][i] else (0, 0, 255)
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            
-            # Draw behavior text above bounding box
-            cv2.putText(frame, 
-                analysis['behaviors'][i], 
-                (x1, y1 - 10), 
-                cv2.FONT_HERSHEY_SIMPLEX, 
-                0.5, 
-                color, 
-                2
-            )
+            cv2.putText(frame, analysis['behaviors'][i], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-        # Display results
-        cv2.putText(frame, 
-            f"People: {analysis['people_count']}", 
-            (10, 30), 
-            cv2.FONT_HERSHEY_SIMPLEX, 
-            1, 
-            (255, 255, 255), 
-            2
-        )
-        
-        # Indicate if behavior was detected
-        if any('Panicked' in behavior for behavior in analysis['behaviors']):
-            cv2.putText(frame, 
-                "BEHAVIOR DETECTED!", 
-                (10, 90), 
-                cv2.FONT_HERSHEY_SIMPLEX, 
-                1, 
-                (0, 0, 255), 
-                2
-            )
-        # Encode the frame as JPEG
+        # Encode frame as JPEG
         _, buffer = cv2.imencode('.jpg', frame)
         frame_bytes = buffer.tobytes()
 
-        # Yield the frame in HTTP response
+        # Yield frame for video feed
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
+# Routes
+@app.route('/video_feed_data')
+def video_feed_data():
+    return jsonify(latest_analysis)
+
 @app.route('/video_feed')
 def video_feed():
-    return Response(generate_frames(),
-                    headers={"Access-Control-Allow-Origin": "*"},
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
-
+    return Response(generate_frames(), headers={"Access-Control-Allow-Origin": "*"}, mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/')
 def home():
     return render_template('home.html')
 
-@app.route('/get_confidence')
-def get_confidence():
-    confidence_level = random.randint(50, 80)  # Simulating a changing confidence level
-    return jsonify({'confidence_level': confidence_level})
+def generate_confidence_level():
+    # Randomly simulate a confidence level between 50 and 100
+    return random.randint(50, 100)
 
+# Modify this function to send confidence_level as part of the metrics
+@app.route('/get_metrics')
+def get_metrics():
+    global latest_analysis
+
+    # Simulating a confidence level
+    latest_analysis['confidence_level'] = generate_confidence_level()
+
+    return jsonify(latest_analysis)
+
+UPLOAD_FOLDER = 'uploaded_videos'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/upload_video', methods=['POST'])
+def upload_video():
+    if 'video' not in request.files:
+        return jsonify({'success': False, 'message': 'No video uploaded'})
+
+    video_file = request.files['video']
+    filename = video_file.filename
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    video_file.save(file_path)
+
+    # Optionally analyze the video in the background
+
+    return jsonify({'success': True, 'message': 'Video uploaded successfully'})
 
 if __name__ == '__main__':
     app.run(debug=True)
