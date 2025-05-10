@@ -4,98 +4,110 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SafeVision</title>
-
-    <!-- CSS Files -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}" />
-
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100..900&family=Roboto:wght@100..900&family=Smooch+Sans:wght@100..900&family=VT323&display=swap" rel="stylesheet" />
-
-    <!-- FontAwesome -->
     <script src="https://kit.fontawesome.com/57a0898944.js" crossorigin="anonymous"></script>
+    <style>
+        #source-form { margin: 20px 0; text-align: center; }
+        #source-form select, #source-form input, #source-form button { margin: 5px; padding: 5px; }
+        #status { color: red; margin-top: 10px; }
+    </style>
 </head>
 <body>
-      <!-- Preloader -->
-<div id="preloader">
-  <div class="loader"></div>
-</div>
-
+    <div id="preloader"><div class="loader"></div></div>
     <nav id="navbar">
         <div class="nav-container">
-            <div class="logo">
-                <a href="{{ url_for('home') }}">SafeVision</a>
-            </div>
-
+            <div class="logo"><a href="{{ url_for('home') }}">SafeVision</a></div>
         </div>
     </nav>
     <section class="hero" id="hero">
-      <div class="hero-content" id="hero-content">
-        <h1 id="hero-content-h1">
-          Detecting Danger Before It <span id="home-h1-strikes">Strikes.</span>
-        </h1> 
-        
-      </div>
-
+        <div class="hero-content" id="hero-content">
+            <h1 id="hero-content-h1">Detecting Danger Before It <span id="home-h1-strikes">Strikes.</span></h1>
+        </div>
     </section>
+    <div id="source-form">
+        <label for="source">Select Source:</label>
+        <select id="source" name="source">
+            <option value="webcam">Webcam</option>
+            <option value="video">Video File</option>
+            <option value="ip">IP Camera</option>
+        </select>
+        <input type="text" id="source-path" placeholder="Enter video path or IP URL" style="width: 300px;">
+        <input type="number" id="webcam-index" placeholder="Webcam index" value="0" style="width: 100px;">
+        <button onclick="setSource()">Set Source</button>
+        <div id="status"></div>
+    </div>
     <div class="video-container">
-      <img src="{{ url_for('video_feed')}}" width="640" height="480" />  
+        <img src="{{ url_for('video_feed') }}" width="640" height="480" />
     </div>
     <div class="metrics">
-      <div class="circle-container">
-        <svg width="150" height="150" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="40" stroke="#ddd" stroke-width="10" fill="none"></circle>
-            <circle id="progress" cx="50" cy="50" r="40" stroke="#00b5e2" stroke-width="10" fill="none"
-                    stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
-        </svg>
-        <div class="percentage-text" id="percentage">0%</div>
-        <div class="title">Confidence Level</div>
+        <div class="circle-container">
+            <svg width="150" height="150" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="#ddd" stroke-width="10" fill="none"></circle>
+                <circle id="progress" cx="50" cy="50" r="40" stroke="#00b5e2" stroke-width="10" fill="none"
+                        stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+            </svg>
+            <div class="percentage-text" id="percentage">0%</div>
+            <div class="title">Confidence Level</div>
+        </div>
     </div>
-    </div>
-  <script>
-      function setConfidenceLevel(value) {
-        const circle = document.getElementById("progress");
-        const text = document.getElementById("percentage");
-        const maxOffset = 251.2; 
-        const offset = maxOffset - (value / 100) * maxOffset;
-        circle.style.strokeDashoffset = offset;
-        text.textContent = value + "%";
-    }
+    <script>
+        function setConfidenceLevel(value) {
+            const circle = document.getElementById("progress");
+            const text = document.getElementById("percentage");
+            const maxOffset = 251.2;
+            const offset = maxOffset - (value / 100) * maxOffset;
+            circle.style.strokeDashoffset = offset;
+            text.textContent = value + "%";
+        }
 
-    function fetchConfidenceLevel() {
-        fetch('/get_confidence')
-            .then(response => response.json())
-            .then(data => {
-                setConfidenceLevel(data.confidence_level);
+        function fetchConfidenceLevel() {
+            fetch('/get_confidence')
+                .then(response => response.json())
+                .then(data => setConfidenceLevel(data.confidence_level))
+                .catch(error => console.error('Error fetching confidence level:', error));
+        }
+
+        function setSource() {
+            const source = document.getElementById('source').value;
+            const sourcePath = document.getElementById('source-path').value;
+            const webcamIndex = parseInt(document.getElementById('webcam-index').value) || 0;
+            const data = { source, webcam: webcamIndex };
+            if (source === 'video') data.video = sourcePath;
+            if (source === 'ip') data.ip = sourcePath;
+            fetch('/set_source', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
             })
-            .catch(error => console.error('Error fetching confidence level:', error));
-    }
+                .then(response => response.json())
+                .then(data => {
+                    const statusDiv = document.getElementById('status');
+                    statusDiv.style.color = data.status === 'success' ? 'green' : 'red';
+                    statusDiv.innerText = data.status === 'success' ? `Source set to ${data.source}` : `Error: ${data.message}`;
+                })
+                .catch(error => {
+                    document.getElementById('status').innerText = `Error: ${error}`;
+                });
+        }
 
-    // Fetch confidence level every 5 seconds
-    setInterval(fetchConfidenceLevel, 3000);
-
-    // Initial fetch when the page loads
-    fetchConfidenceLevel();
-  </script>
-
-    
-
-
+        setInterval(fetchConfidenceLevel, 3000);
+        fetchConfidenceLevel();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="{{ url_for('static', filename='js/BokehShader.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
+    <script src="{{ url_for('static', filename='js/animation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-  <script src="{{ url_for('static', filename='js/BokehShader.js') }}"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
-
-<script src="{{ url_for('static', filename='js/animation.js') }}"></script>
-<script src="{{ url_for('static', filename='js/common.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </html>

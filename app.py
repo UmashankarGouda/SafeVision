@@ -1,8 +1,4 @@
-from flask import Flask, render_template, Response, jsonify
-import cv2
-import socket
-import struct
-import pickle
+from flask import Flask, render_template, Response, jsonify,request
 import cv2
 import torch
 import os
@@ -15,10 +11,18 @@ import socket
 import struct
 import pickle
 import random
+import argparse
+import logging
+
 
 # Create folders to save images
 SAVE_DIR = "detected_behaviors"
 os.makedirs(SAVE_DIR, exist_ok=True)
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 
 # YOLOv8 for People Detection
 class PeopleDetectionModel:
@@ -180,88 +184,127 @@ class IntegratedSurveillanceSystem:
             'behavior_detected': behavior_detected
         }
 
+def parse_arguments():
+    """Parse command line arguments while maintaining compatibility with Flask"""
+    # Create our own parser for custom arguments
+    parser = argparse.ArgumentParser(description='Surveillance System with multiple input options')
+    
+    # Add arguments with '--surveillance-' prefix to avoid conflicts with Flask's own args
+    parser.add_argument('--surveillance-source', type=str, default='webcam',
+                       choices=['webcam', 'video', 'ip'],
+                       help='Input source: "webcam", "video", or "ip" (default: webcam)')
+    parser.add_argument('--surveillance-video', type=str, default='',
+                       help='Path to video file (required if source is "video")')
+    parser.add_argument('--surveillance-ip', type=str, default='',
+                       help='URL of IP camera stream (required if source is "ip")')
+    parser.add_argument('--surveillance-webcam', type=int, default=0,
+                       help='Index of webcam to use (default: 0)')
+    
+    # Parse known args only to avoid conflicts with Flask
+    args, _ = parser.parse_known_args()
+    return args
 
 app = Flask(__name__)
+# Global state for current source
+current_source = {
+    'source': 'webcam',
+    'video': '',
+    'ip': '',
+    'webcam': 0,
+    'cap': None,
+    'last_updated': time.time()
+}
+
+def initialize_capture(source, video_path, ip_url, webcam_index):
+    global current_source
+    if current_source['cap'] is not None:
+        current_source['cap'].release()
+    try:
+        if source == 'video':
+            if not video_path or not os.path.exists(video_path):
+                raise ValueError(f"Video file {video_path} does not exist")
+            cap = cv2.VideoCapture(video_path)
+        elif source == 'ip':
+            if not ip_url:
+                raise ValueError("IP camera URL is required")
+            cap = cv2.VideoCapture(ip_url)
+        else:
+            cap = cv2.VideoCapture(webcam_index)
+        if not cap.isOpened():
+            raise RuntimeError(f"Could not open video source: {source}")
+        current_source['cap'] = cap
+        logger.info(f"Initialized video source: {source}")
+        return True
+    except Exception as e:
+        logger.error(f"Error initializing video source: {e}")
+        current_source['cap'] = None
+        return False
+def load_config(config_path='config.json'):
+    """Load configuration from a JSON file if it exists."""
+    import json
+    import os
+    default_config = {
+        'source': 'webcam',
+        'video': '',
+        'ip': '',
+        'webcam': 0
+    }
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+            default_config.update(config)
+            logger.info(f"Loaded configuration from {config_path}")
+        except Exception as e:
+            logger.error(f"Error loading config file {config_path}: {e}")
+    return default_config
+
 
 def generate_frames():
-    SAVE_INTERVAL = 10*60  # Save images every 10 minutes
+    global current_source
+    config = load_config()
+    args = parse_arguments()
+    source = args.surveillance_source if args.surveillance_source else config['source']
+    video_path = args.surveillance_video if args.surveillance_video else config['video']
+    ip_url = args.surveillance_ip if args.surveillance_ip else config['ip']
+    webcam_index = args.surveillance_webcam if args.surveillance_webcam is not None else config['webcam']
+    current_source.update({'source': source, 'video': video_path, 'ip': ip_url, 'webcam': webcam_index})
     
+    if not initialize_capture(source, video_path, ip_url, webcam_index):
+        blank_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+        cv2.putText(blank_frame, "Error: Invalid Source", (50, 240), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        _, buffer = cv2.imencode('.jpg', blank_frame)
+        yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+        return
+    
+    SAVE_INTERVAL = 10 * 60
     analyzer = IntegratedSurveillanceSystem(save_interval=SAVE_INTERVAL)
-    cap = cv2.VideoCapture(0)  # Open webcam
     
-    print(f"Starting integrated surveillance. Saving only panicked behavior frames.")
-    
-    """ Capture frames from OpenCV and yield them as a stream """
     while True:
-        
-        ret, frame = cap.read()
+        if current_source['cap'] is None:
+            blank_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+            cv2.putText(blank_frame, "Error: Invalid Source", (50, 240), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            _, buffer = cv2.imencode('.jpg', blank_frame)
+            yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            continue
+        ret, frame = current_source['cap'].read()
         if not ret:
-            print("Error: Could not read frame.")
-            break
-        
-        # Analyze frame
-        analysis = analyzer.analyze_frame(frame, save_images=False)  # Disable automatic saving
-        
-        # Print people count and behaviors
-        print(f"People Count: {analysis['people_count']}")
-        for behavior in analysis['behaviors']:
-            print(f"Behavior: {behavior}")
-        
-        # Manually save frame only if panicked behavior is detected
-        if any('Panicked' in behavior for behavior in analysis['behaviors']):
-            file_path = os.path.join(SAVE_DIR, f"panicked_surveillance_{int(time.time())}.jpg")
-            cv2.imwrite(file_path, frame)
-            print("Panicked behavior detected! Frame saved.")
-
-        # Draw bounding boxes and labels
-        for i, (x1, y1, x2, y2) in enumerate(analysis['people_boxes']):
-            # Use different colors for different behavior states
-            if "Panicked" in analysis['behaviors'][i]:
-                color = (0, 0, 255)  # Red for panicked
-            elif "Normal" in analysis['behaviors'][i]:
-                color = (0, 255, 0)  # Green for normal
-            else:
-                color = (255, 255, 0)  # Yellow for other behaviors
-                
-            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            
-            # Draw behavior text above bounding box
-            cv2.putText(frame, 
-                analysis['behaviors'][i], 
-                (x1, y1 - 10), 
-                cv2.FONT_HERSHEY_SIMPLEX, 
-                0.5, 
-                color, 
-                2
-            )
-
-        # Display results
-        cv2.putText(frame, 
-            f"People: {analysis['people_count']}", 
-            (10, 30), 
-            cv2.FONT_HERSHEY_SIMPLEX, 
-            1, 
-            (255, 255, 255), 
-            2
-        )
-        
-        # Indicate if behavior was detected
-        if any('Panicked' in behavior for behavior in analysis['behaviors']):
-            cv2.putText(frame, 
-                "BEHAVIOR DETECTED!", 
-                (10, 90), 
-                cv2.FONT_HERSHEY_SIMPLEX, 
-                1, 
-                (0, 0, 255), 
-                2
-            )
-        # Encode the frame as JPEG
+            if current_source['source'] == 'video':
+                current_source['cap'].set(cv2.CAP_PROP_POS_FRAMES, 0)
+                continue
+            logger.error("Error: Could not read frame")
+            blank_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+            cv2.putText(blank_frame, "Error: Frame Read Failed", (50, 240), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            _, buffer = cv2.imencode('.jpg', blank_frame)
+            yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            continue
+        analysis = analyzer.analyze_frame(frame)
+        cv2.putText(frame, f"Source: {current_source['source']}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
         _, buffer = cv2.imencode('.jpg', frame)
-        frame_bytes = buffer.tobytes()
+        yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
 
-        # Yield the frame in HTTP response
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
+
 
 @app.route('/video_feed')
 def video_feed():
@@ -269,16 +312,30 @@ def video_feed():
                     headers={"Access-Control-Allow-Origin": "*"},
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
 @app.route('/')
 def home():
     return render_template('home.html')
 
 @app.route('/get_confidence')
 def get_confidence():
-    confidence_level = random.randint(50, 80)  # Simulating a changing confidence level
-    return jsonify({'confidence_level': confidence_level})
+    return jsonify({'confidence_level': random.randint(50, 80)})
 
+@app.route('/set_source', methods=['POST'])
+def set_source():
+    global current_source
+    data = request.get_json()
+    if not data:
+        return jsonify({'status': 'error', 'message': 'No data provided'}), 400
+    source = data.get('source', 'webcam')
+    video_path = data.get('video', '')
+    ip_url = data.get('ip', '')
+    webcam_index = data.get('webcam', 0)
+    if source not in ['webcam', 'video', 'ip']:
+        return jsonify({'status': 'error', 'message': 'Invalid source'}), 400
+    current_source.update({'source': source, 'video': video_path, 'ip': ip_url, 'webcam': webcam_index, 'last_updated': time.time()})
+    if initialize_capture(source, video_path, ip_url, webcam_index):
+        return jsonify({'status': 'success', 'source': source})
+    return jsonify({'status': 'error', 'message': f'Failed to initialize {source}'}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
