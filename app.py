@@ -1,32 +1,30 @@
-"""
-    SafeVision - AI-Powered Intelligent Surveillance for Assault Prevention.
-    Main application entry point.
-"""
+from flask import Blueprint, render_template, jsonify
+import sqlite3
+from datetime import datetime, timedelta
 
-from flask import Flask
-import config
-from routes import pages_bp, surveillance_bp
+# Define blueprint
+analytics_bp = Blueprint('analytics', __name__)
 
-def create_app():
-    """
-    Create and configure the Flask application.
+# Route to show analytics page
+@analytics_bp.route('/analytics')
+def analytics():
+    return render_template('analytics.html')
+
+# API route for fetching analytics data
+@analytics_bp.route('/api/analytics/data')
+def analytics_data():
+    # Your database logic here (as you've already written)
+    conn = sqlite3.connect('alerts.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
     
-    Returns:
-        Flask: Configured Flask application
-    """
-    app = Flask(__name__)
-    
-    # Register blueprints
-    app.register_blueprint(surveillance_bp)
-    app.register_blueprint(pages_bp)
-    
-    return app
+    # Query the database and return JSON data
+    # (code for fetching data from the database, as you already have it)
 
-
-if __name__ == '__main__':
-    """
-        Main entry point for the application.
-        Starts the Flask development server.
-    """
-    app = create_app()
-    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
+    return jsonify({
+        'total_alerts': total_alerts,
+        'locations': locations_data,
+        'categories': categories_data,
+        'trend': trend_data,
+        'recent_alerts': recent_alerts
+    })

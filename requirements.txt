@@ -1,3 +1,16 @@
+Flask==2.3.3
+Jinja2==3.1.3
+Werkzeug==2.3.7
+itsdangerous==2.1.2
+click==8.1.7
+sqlite3  # built-in with Python, no need to install separately
+python-dotenv==1.0.1  # if you're using .env config files
+requests==2.31.0
+numpy==1.25.3
+opencv-python
+opencv-python-headless
+pandas==2.0.3
+scikit-learn==1.2.2
 
 flask>=3.1.0
 opencv-python>=4.11.0
