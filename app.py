@@ -1,17 +1,30 @@
-from flask import Flask
-import config
-from routes import pages_bp, surveillance_bp, analytics_bp
+from flask import Blueprint, render_template, jsonify
+import sqlite3
+from datetime import datetime, timedelta
 
-def create_app():
-    app = Flask(__name__)
+# Define blueprint
+analytics_bp = Blueprint('analytics', __name__)
 
-    # Register blueprints
-    app.register_blueprint(surveillance_bp)
-    app.register_blueprint(pages_bp)
-    app.register_blueprint(analytics_bp)
+# Route to show analytics page
+@analytics_bp.route('/analytics')
+def analytics():
+    return render_template('analytics.html')
 
-    return app
+# API route for fetching analytics data
+@analytics_bp.route('/api/analytics/data')
+def analytics_data():
+    # Your database logic here (as you've already written)
+    conn = sqlite3.connect('alerts.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    # Query the database and return JSON data
+    # (code for fetching data from the database, as you already have it)
 
-if __name__ == '__main__':
-    app = create_app()
-    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
+    return jsonify({
+        'total_alerts': total_alerts,
+        'locations': locations_data,
+        'categories': categories_data,
+        'trend': trend_data,
+        'recent_alerts': recent_alerts
+    })
