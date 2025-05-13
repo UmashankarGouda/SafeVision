@@ -18,6 +18,7 @@ class FrameService:
         self.save_interval = save_interval or config.SAVE_INTERVAL
         self.analyzer = IntegratedSurveillanceSystem(save_interval=self.save_interval)
         self.camera = None
+        self.confidence_level = 0  # Initialize confidence level
     
     def start_camera(self, camera_id=0):
         """
@@ -50,6 +51,46 @@ class FrameService:
         ret, frame = self.camera.read()
         return ret, frame
     
+    def generate_frames(self):
+        """
+        Generator that yields processed frames for the video feed.
+        
+        Yields:
+            bytes: JPEG encoded frame
+        """
+        while True:
+            success, frame = self.get_frame()
+            if not success:
+                break
+            
+            # Process and analyze the frame
+            processed_frame, analysis = self.analyze_and_process_frame(frame)
+            
+            # Update confidence level based on analysis
+            if analysis['behavior_detected']:
+                # If suspicious behavior detected, increase confidence
+                self.confidence_level = min(100, self.confidence_level + 5)
+            else:
+                # If no suspicious behavior, slowly decrease confidence
+                self.confidence_level = max(0, self.confidence_level - 1)
+            
+            # Encode the frame as JPEG
+            ret, buffer = cv2.imencode('.jpg', processed_frame)
+            
+            # Convert to bytes and yield
+            frame_bytes = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+    
+    def get_confidence_level(self):
+        """
+        Get the current confidence level of suspicious activity.
+        
+        Returns:
+            int: Confidence level (0-100)
+        """
+        return self.confidence_level
+    
     def analyze_and_process_frame(self, frame):
         """
         Analyze a frame and process it for display.
@@ -81,6 +122,8 @@ class FrameService:
             # Use different colors for different behavior states
             if "Panicked" in analysis['behaviors'][i]:
                 color = (0, 0, 255)  # Red for panicked
+            elif "Aggressive" in analysis['behaviors'][i]:
+                color = (0, 0, 255)  # Red for aggressive
             elif "Normal" in analysis['behaviors'][i]:
                 color = (0, 255, 0)  # Green for normal
             else:
@@ -97,6 +140,21 @@ class FrameService:
                 color, 
                 2
             )
+            
+            # Draw pose keypoints if available
+            if i < len(analysis.get('keypoints', [])) and analysis['keypoints'][i] is not None:
+                keypoints = analysis['keypoints'][i]
+                
+                # Draw keypoints and connections based on pose_model.visualize_pose logic
+                # This is simplified for consistency with the MediaPipe implementation
+                pose_vis = self.analyzer.behavior_classifier.pose_model.visualize_pose(
+                    processed_frame[y1:y2, x1:x2], 
+                    keypoints
+                )
+                
+                # Replace the region with the visualization if successful
+                if pose_vis is not None and pose_vis.size > 0:
+                    processed_frame[y1:y2, x1:x2] = pose_vis
 
         # Display people count
         cv2.putText(processed_frame, 
@@ -108,53 +166,14 @@ class FrameService:
             2
         )
         
-        # Indicate if behavior was detected
-        if any('Panicked' in behavior for behavior in analysis['behaviors']):
-            cv2.putText(processed_frame, 
-                "BEHAVIOR DETECTED!", 
-                (10, 90), 
-                cv2.FONT_HERSHEY_SIMPLEX, 
-                1, 
-                (0, 0, 255), 
-                2
-            )
-            
+        # Display confidence level
+        cv2.putText(processed_frame, 
+            f"Suspicion: {self.confidence_level}%", 
+            (10, 70), 
+            cv2.FONT_HERSHEY_SIMPLEX, 
+            1, 
+            (0, 0, 255) if self.confidence_level > 50 else (255, 255, 255), 
+            2
+        )
+        
         return processed_frame, analysis
-    
-    def get_processed_frame(self):
-        """
-        Get a processed frame with analysis.
-        
-        Returns:
-            bytes: JPEG encoded frame
-        """
-        ret, frame = self.get_frame()
-        if not ret:
-            return None
-        
-        processed_frame, _ = self.analyze_and_process_frame(frame)
-        
-        # Encode frame as JPEG
-        _, buffer = cv2.imencode('.jpg', processed_frame)
-        frame_bytes = buffer.tobytes()
-        
-        return frame_bytes
-    
-    def generate_frames(self):
-        """
-        Generator function to continuously yield processed frames.
-        
-        Yields:
-            bytes: HTTP response chunks containing JPEG frames
-        """
-        print("Starting surveillance stream...")
-        
-        while True:
-            frame_bytes = self.get_processed_frame()
-            
-            if frame_bytes is None:
-                print("Error: Could not read frame.")
-                break
-                
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')

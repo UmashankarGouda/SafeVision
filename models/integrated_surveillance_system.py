@@ -32,6 +32,7 @@ class IntegratedSurveillanceSystem:
         """
         people_data = self.people_detector.detect_people(frame)
         behaviors = []
+        keypoints = []  # Add keypoints to store pose information
         # current_time = time.time()
         behavior_detected = False
         
@@ -43,10 +44,15 @@ class IntegratedSurveillanceSystem:
             # Skip if person crop is empty
             if person_frame.size == 0:
                 behaviors.append(f"Person {i+1}: Not fully visible")
+                keypoints.append(None)
                 continue
                 
             behavior = self.behavior_classifier.classify_behavior(frame, i, box)
             behaviors.append(f"Person {i+1}: {behavior}")
+            
+            # Get keypoints from behavior classifier for this person
+            person_keypoints = self.behavior_classifier.get_person_keypoints(i)
+            keypoints.append(person_keypoints)
             
             # Check if this is an interesting behavior to save
             if behavior != "Normal":
@@ -56,5 +62,6 @@ class IntegratedSurveillanceSystem:
             'people_count': people_data['count'],
             'behaviors': behaviors,
             'people_boxes': people_data['boxes'],
+            'keypoints': keypoints,  # Add keypoints to the output
             'behavior_detected': behavior_detected
         }

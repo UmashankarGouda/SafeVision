@@ -1,7 +1,9 @@
 """
-Controller for handling surveillance operations.
+Controller for handling surveillance functionality.
 """
-import random
+import cv2
+import json
+import config
 from services.frame_service import FrameService
 
 class SurveillanceController:
@@ -9,31 +11,28 @@ class SurveillanceController:
         """Initialize the surveillance controller."""
         self.frame_service = FrameService()
         self._frame_generator = None
-    
+
     def get_frame_generator(self):
         """
-        Get a generator for streaming video frames.
+        Get a generator that yields processed frames.
         
         Returns:
             generator: Frame generator
         """
-        if self._frame_generator is None:
+        if not self._frame_generator:
             self._frame_generator = self.frame_service.generate_frames()
         return self._frame_generator
-    
-    def release_resources(self):
-        """Release all resources used by the controller."""
-        self.frame_service.stop_camera()
-        self._frame_generator = None
-    
+
     def get_confidence_level(self):
         """
-        Get the current confidence level of the system.
-        Currently implements a random confidence level for demonstration.
+        Get the current confidence level of suspicious activity.
         
         Returns:
-            int: Confidence level (0-100)
+            dict: JSON response with confidence level
         """
-        # This is a placeholder. In a real system, this would be calculated
-        # based on model confidence scores, detection rates, etc.
-        return random.randint(50, 80)
+        confidence = self.frame_service.get_confidence_level()
+        return json.dumps({"confidence": confidence})
+
+    def stop_camera(self):
+        """Release camera resources."""
+        self.frame_service.stop_camera()

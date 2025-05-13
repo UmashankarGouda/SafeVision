@@ -6,6 +6,7 @@ import numpy as np
 from PIL import Image
 from transformers import pipeline
 import config
+from models.pose_former_model import PoseFormerModel  # Import the new PoseFormer model
 
 class BehaviorClassificationModel:
     def __init__(self):
@@ -21,6 +22,9 @@ class BehaviorClassificationModel:
         self.face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
         # Dictionary to track each person's last position for rapid movement detection
         self.people_tracking = {}
+        
+        # Initialize PoseFormer model for pose detection
+        self.pose_model = PoseFormerModel()
     
     def classify_behavior(self, frame, person_id, box):
         """
@@ -37,11 +41,11 @@ class BehaviorClassificationModel:
         x1, y1, x2, y2 = box
         person_frame = frame[y1:y2, x1:x2]  # Crop person from frame
         
-        # Basic behavior detection using ML model
         # Skip empty frames
         if person_frame.size == 0:
             return "Unknown"
-            
+        
+        # Basic behavior detection using ML model
         # Convert OpenCV frame (BGR) to RGB and resize it
         frame_rgb = cv2.cvtColor(person_frame, cv2.COLOR_BGR2RGB)
         resized_frame = cv2.resize(frame_rgb, (224, 224))  # ResNet expects 224x224 input
@@ -89,24 +93,29 @@ class BehaviorClassificationModel:
             if fh > config.FACE_SIZE_THRESHOLD:  # Face appears larger
                 behaviors.append("Leaning Forward")
         
-        # Detect raised hands using skin color detection
-        hsv = cv2.cvtColor(person_frame, cv2.COLOR_BGR2HSV)
-        lower_skin = np.array(config.SKIN_COLOR_LOWER, dtype=np.uint8)
-        upper_skin = np.array(config.SKIN_COLOR_UPPER, dtype=np.uint8)
-        mask = cv2.inRange(hsv, lower_skin, upper_skin)
-        
-        # Find contours
-        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        
-        for cnt in contours:
-            area = cv2.contourArea(cnt)
-            if area > config.SKIN_AREA_THRESHOLD:  # Significant skin area
-                hx, hy, hw, hh = cv2.boundingRect(cnt)
-                if hy < (y2 - y1) // 2:  # If hand is in upper half of person region
-                    behaviors.append("Hands Raised")
+        # NEW: PoseFormer-based body language detection
+        try:
+            # Detect pose keypoints
+            keypoints = self.pose_model.detect_pose(person_frame)
+            
+            # Analyze posture for aggressive patterns
+            posture_analysis = self.pose_model.analyze_posture(keypoints)
+            
+            # Add detected patterns to behaviors
+            if posture_analysis["is_aggressive"]:
+                for pattern in posture_analysis["detected_patterns"]:
+                    behaviors.append(f"Aggressive Posture: {pattern['name']}")
+                
+            # Store keypoints for visualization (attach to the person object)
+            if not hasattr(self, 'person_keypoints'):
+                self.person_keypoints = {}
+            self.person_keypoints[f"Person_{person_id}"] = keypoints
+                
+        except Exception as e:
+            print(f"Error in pose detection: {e}")
         
         # Combine ML and rule-based behavior detection
-        if ml_behavior == "Panicked" or "Rapid Movement" in behaviors:
+        if ml_behavior == "Panicked" or "Rapid Movement" in behaviors or any("Aggressive" in b for b in behaviors):
             final_behavior = "Panicked"
         elif len(behaviors) > 0:
             final_behavior = " & ".join(behaviors)
@@ -130,3 +139,17 @@ class BehaviorClassificationModel:
             if any(indicator in pred['label'].lower() for indicator in panic_indicators):
                 return 'Panicked'
         return 'Normal'
+        
+    def get_person_keypoints(self, person_id):
+        """
+        Get stored keypoints for a specific person.
+        
+        Args:
+            person_id: Unique identifier for the person
+            
+        Returns:
+            numpy array: Keypoints for the person if available, else None
+        """
+        if hasattr(self, 'person_keypoints'):
+            return self.person_keypoints.get(f"Person_{person_id}")
+        return None
