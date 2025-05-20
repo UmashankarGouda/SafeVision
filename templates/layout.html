@@ -45,3 +45,8 @@
     {% block scripts %}{% endblock %}
   </body>
 </html>
+
+<form method="post" action="{{ url_for('your_post_route') }}">
+    {{ csrf_token() }}
+    <!-- form fields here -->
+</form>
