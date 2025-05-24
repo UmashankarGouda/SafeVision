@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page Not Found - SafeVision</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/403.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/404.css') }}" />
+  </head>
+  <body>
+    <div class="error-container">
+      <h1 class="error-code">404</h1>
+      <h2 class="error-message">Page Not Found</h2>
+      <p class="error-description">
+        The page you are looking for does not exist or has been moved.
+      </p>
+      <div class="action-buttons">
+        <a href="{{ url_for('pages.home') }}" class="btn btn-primary">Go Home</a>
+      </div>
+    </div>
+  </body>
+</html>

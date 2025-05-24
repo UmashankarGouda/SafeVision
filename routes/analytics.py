@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request
 import sqlite3
 from datetime import datetime, timedelta
+from auth import require_auth
 
 analytics_bp = Blueprint("analytics", __name__)
 
@@ -57,12 +58,14 @@ def init_database():
 
 
 @analytics_bp.route("/analytics")
+@require_auth
 def analytics():
     """Render the analytics dashboard page."""
     return render_template("analytics.html")
 
 
 @analytics_bp.route("/api/analytics/data")
+@require_auth
 def analytics_data():
     """Get analytics data with filtering support."""
 
@@ -193,6 +196,7 @@ def analytics_data():
 
 
 @analytics_bp.route("/api/analytics/record_alert", methods=["POST"])
+@require_auth
 def record_alert():
     """Record a new alert in the analytics database."""
     try:
@@ -229,6 +233,7 @@ def record_alert():
 
 
 @analytics_bp.route("/api/analytics/record_session", methods=["POST"])
+@require_auth
 def record_session():
     """Record session data for analytics."""
     try:
@@ -266,6 +271,7 @@ def record_session():
 
 
 @analytics_bp.route("/api/analytics/record_detection", methods=["POST"])
+@require_auth
 def record_detection():
     """Record detection event for detailed analytics."""
     try:

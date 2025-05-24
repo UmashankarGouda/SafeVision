@@ -1,0 +1,48 @@
+/* 404.css - Custom styles for 404 Page Not Found */
+.error-container {
+  max-width: 420px;
+  margin: 8% auto 0 auto;
+  padding: 2.5rem 2rem 2rem 2rem;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.13);
+  text-align: center;
+}
+.error-code {
+  font-size: 5.5rem;
+  font-weight: 800;
+  color: #e74c3c;
+  margin-bottom: 0.5rem;
+}
+.error-message {
+  font-size: 2.1rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 0.7rem;
+}
+.error-description {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.btn {
+  padding: 0.7rem 1.6rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-primary {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+}
+.btn-primary:hover {
+  background: #c0392b;
+}

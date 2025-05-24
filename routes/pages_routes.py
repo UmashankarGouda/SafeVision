@@ -24,6 +24,7 @@ def settings():
 
 
 @pages_bp.route("/recordings")
+@require_auth
 def recordings():
     """Video recordings page route."""
     return render_template("recordings.html")
