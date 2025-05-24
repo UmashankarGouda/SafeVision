@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, jsonify
 import sqlite3
 from datetime import datetime, timedelta
+import logging
+from flask import Flask, jsonify
+import os
 
 # Define blueprint
 analytics_bp = Blueprint('analytics', __name__)
@@ -13,18 +16,45 @@ def analytics():
 # API route for fetching analytics data
 @analytics_bp.route('/api/analytics/data')
 def analytics_data():
-    # Your database logic here (as you've already written)
-    conn = sqlite3.connect('alerts.db')
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    
-    # Query the database and return JSON data
-    # (code for fetching data from the database, as you already have it)
-
+    # ...validation code...
+    with sqlite3.connect('alerts.db') as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        # ...your queries...
+        # Example:
+        cursor.execute("SELECT COUNT(*) as total FROM alerts")
+        total_alerts = cursor.fetchone()['total']
+        # ...other queries...
     return jsonify({
         'total_alerts': total_alerts,
-        'locations': locations_data,
-        'categories': categories_data,
-        'trend': trend_data,
-        'recent_alerts': recent_alerts
+        # ...other fields...
     })
+
+def create_app():
+    app = Flask(__name__)
+
+    # ...existing blueprint registration...
+
+    # Ensure logs directory exists
+    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    log_path = os.path.join(log_dir, "safevision.log")
+
+    # Prevent duplicate handlers
+    if not app.logger.handlers:
+        file_handler = logging.FileHandler(log_path)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        app.logger.setLevel(logging.INFO)
+
+    # Centralized error handler
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        app.logger.error(f"Unhandled Exception: {e}", exc_info=True)
+        return jsonify({"error": "Internal server error"}), 500
+
+    return app
+
+# If you use app = Flask(__name__) directly, add the logging and errorhandler after app = Flask(__name__)
