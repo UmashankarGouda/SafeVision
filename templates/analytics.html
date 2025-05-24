@@ -1,5 +1,6 @@
-{% extends 'layout.html' %} {% block title %}Analytics Dashboard - SafeVision{%
-endblock %} {% block css %}
+{% extends 'layout.html' %}
+{% block title %}Analytics Dashboard - SafeVision{%endblock %}
+{% block css %}
 <link
   rel="stylesheet"
   href="{{url_for('static', filename='css/analytics.css')}}"
@@ -186,10 +187,10 @@ endblock %} {% block css %}
         </table>
       </div>
     </div>
-  </div>
-  {% endblock %} {% block scripts %}
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="{{url_for('static', filename='js/analytics.js')}}"></script>
-  </script>
+{% block scripts %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js" integrity="sha512-L0Shl7nXXzIlBSUUPpxrokqq4ojqgZFQczTYlGjzONGTDAcLremjwaWv5A+EDLnxhQzY5xUZPWLOLqYRkY0Cbw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+   <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+   {% endblock %}
   {% endblock %}
+</div>
 </div>

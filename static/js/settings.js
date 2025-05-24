@@ -184,8 +184,18 @@ function saveSettings() {
   }
 
   // Apply settings to current session if on home page
-  if (window.parent && window.parent.applySettings) {
-    window.parent.applySettings(currentSettings);
+  // Only apply settings if we're in a trusted context
+  if (window.parent && window.parent !== window) {
+    try {
+      // Check if parent is same origin
+      const parentLocation = window.parent.location.href;
+      if (window.parent.applySettings) {
+        window.parent.applySettings(currentSettings);
+      }
+    } catch (e) {
+      // Cross-origin access will throw, which is expected
+      console.warn("Cannot access parent window - different origin");
+    }
   }
 
   alert("Settings saved successfully!");

@@ -11,6 +11,7 @@ from services.video_recorder import video_recorder
 import time
 import requests
 import json
+from config import HOST, PORT
 from datetime import datetime
 
 # Create Blueprint
@@ -51,7 +52,7 @@ def record_analytics_session(session_info, end_time=None):
 
         # Record session in analytics
         requests.post(
-            "http://127.0.0.1:5000/api/analytics/record_session",
+            f"http://{HOST}:{PORT}/api/analytics/record_session",
             json=session_data,
             timeout=5,
         )
@@ -100,7 +101,7 @@ def record_analytics_detection(session_id, detection_data):
 
         # Record detection in analytics
         requests.post(
-            "http://127.0.0.1:5000/api/analytics/record_detection",
+            f"http://{HOST}:{PORT}/api/analytics/record_detection",
             json=detection_record,
             timeout=5,
         )

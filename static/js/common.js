@@ -2,7 +2,6 @@ function toggleMobileMenu() {
   const menu = document.getElementById("nav-menu");
   const toggle = document.querySelector(".mobile-menu-toggle i");
 
-  // Change hamburger to X when active
   if (menu.classList.contains("active")) {
     menu.classList.remove("active");
     toggle.className = "fas fa-bars";

@@ -96,7 +96,15 @@ class PerformanceMonitor:
 
         cpu_percent = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
-        disk = psutil.disk_usage("/")
+        # Use the root of the current drive on Windows, "/" on Unix
+        import platform
+
+        disk_path = (
+            "/"
+            if platform.system() != "Windows"
+            else psutil.disk_partitions()[0].mountpoint
+        )
+        disk = psutil.disk_usage(disk_path)
 
         self.performance_history["cpu"].append(cpu_percent)
         self.performance_history["memory"].append(memory.percent)
@@ -146,7 +154,7 @@ class PerformanceMonitor:
             alert = PerformanceAlert(
                 alert_type=metric_type,
                 severity="warning",
-                message=f"{description} is high: {value:.1f}%",
+                message=f"{description} is high: {value:.1f}{'%' if metric_type.endswith('_percent') else ''}",
                 value=value,
                 threshold=thresholds["warning"],
             )
@@ -234,6 +242,9 @@ class PerformanceMonitor:
                     filtered_data["queue_sizes"].append(
                         self.performance_history["queue_sizes"][i]
                     )
+                else:
+                    # Append None or 0 to maintain alignment with timestamps
+                    filtered_data["queue_sizes"].append(None)
                 filtered_data["timestamps"].append(timestamp.isoformat())
 
         return filtered_data

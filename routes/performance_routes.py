@@ -8,7 +8,28 @@ from services.performance_monitor import performance_monitor
 import requests
 import json
 
+from config import HOST, PORT
+import time
+from typing import Optional
+
 performance_bp = Blueprint("performance", __name__, url_prefix="/api/performance")
+
+
+def post_with_retry(
+    url: str, json_data: dict, max_retries: int = 3, timeout: int = 5
+) -> Optional[requests.Response]:
+    """Post data with retry logic."""
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=json_data, timeout=timeout)
+            response.raise_for_status()
+            return response
+        except requests.exceptions.RequestException as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(2**attempt)  # Exponential backoff
+    return None
 
 
 def alert_callback(alert):
@@ -32,11 +53,12 @@ def alert_callback(alert):
             ),
         }
 
-        requests.post(
-            "http://127.0.0.1:5000/api/analytics/record_alert",
-            json=alert_data,
-            timeout=5,
-        )
+        # Use HTTPS for secure transmission
+        analytics_url = f"http://{HOST}:{PORT}/api/analytics/record_alert"
+
+        # Post with retry logic
+        post_with_retry(analytics_url, alert_data)
+
     except Exception as e:
         print(f"Failed to record performance alert: {e}")
 

@@ -1,8 +1,6 @@
 let trendChart, locationChart, categoryChart;
 
-// Initialize charts
 function initCharts() {
-  // Location Chart
   const locationCtx = document
     .getElementById("location-chart")
     .getContext("2d");
@@ -35,7 +33,6 @@ function initCharts() {
     },
   });
 
-  // Category Chart
   const categoryCtx = document
     .getElementById("category-chart")
     .getContext("2d");
@@ -68,19 +65,16 @@ function initCharts() {
   });
 }
 
-// Update dashboard data
 function updateDashboard() {
   const timeRange = document.getElementById("time-range").value;
   const locationFilter = document.getElementById("location-filter").value;
   const severityFilter = document.getElementById("severity-filter").value;
 
-  // Show loading state
   document.getElementById("total-alerts").textContent = "...";
   document.getElementById("active-sessions").textContent = "...";
   document.getElementById("frames-processed").textContent = "...";
   document.getElementById("detection-rate").textContent = "...";
 
-  // Fetch analytics data
   fetch(
     `/api/analytics/data?range=${timeRange}&location=${locationFilter}&severity=${severityFilter}`
   )
@@ -93,14 +87,13 @@ function updateDashboard() {
     })
     .catch((error) => {
       console.error("Error fetching analytics data:", error);
-      // Show error state
+
       document.getElementById("total-alerts").textContent = "Error";
       document.getElementById("active-sessions").textContent = "Error";
       document.getElementById("frames-processed").textContent = "Error";
       document.getElementById("detection-rate").textContent = "Error";
     });
 
-  // Fetch session stats
   fetch("/session_stats")
     .then((response) => response.json())
     .then((data) => {
@@ -113,19 +106,16 @@ function updateDashboard() {
     .catch((error) => console.error("Error fetching session stats:", error));
 }
 
-// Update metrics cards
 function updateMetrics(data) {
   document.getElementById("total-alerts").textContent = (
     data.total_alerts || 0
   ).toLocaleString();
 
-  // Calculate detection rate (mock data for now)
   const detectionRate =
     data.total_alerts > 0 ? Math.min(95, 85 + Math.random() * 10) : 0;
   document.getElementById("detection-rate").textContent =
     detectionRate.toFixed(1) + "%";
 
-  // Add some mock trend data
   const alertsChange = Math.floor(Math.random() * 20) - 10;
   const framesChange = Math.floor(Math.random() * 15) + 5;
   const accuracyChange = Math.floor(Math.random() * 6) - 3;
@@ -150,16 +140,13 @@ function updateMetrics(data) {
   }`;
 }
 
-// Update charts with data
 function updateCharts(data) {
-  // Update location chart
   if (data.locations && data.locations.length > 0) {
     locationChart.data.labels = data.locations.map((item) => item.location);
     locationChart.data.datasets[0].data = data.locations.map(
       (item) => item.count
     );
   } else {
-    // Mock data
     locationChart.data.labels = [
       "Main Entrance",
       "Parking Lot",
@@ -170,14 +157,12 @@ function updateCharts(data) {
   }
   locationChart.update();
 
-  // Update category chart
   if (data.categories && data.categories.length > 0) {
     categoryChart.data.labels = data.categories.map((item) => item.category);
     categoryChart.data.datasets[0].data = data.categories.map(
       (item) => item.count
     );
   } else {
-    // Mock data
     categoryChart.data.labels = [
       "Suspicious Behavior",
       "Unauthorized Access",
@@ -189,12 +174,10 @@ function updateCharts(data) {
   categoryChart.update();
 }
 
-// Update alerts table
 function updateAlertsTable(alerts) {
   const tbody = document.getElementById("alerts-tbody");
 
   if (alerts.length === 0) {
-    // Create mock data if no real alerts
     alerts = [
       {
         timestamp: new Date().toISOString(),
@@ -245,12 +228,10 @@ function updateAlertsTable(alerts) {
     .join("");
 }
 
-// Update location filter options
 function updateLocationFilter(locations) {
   const select = document.getElementById("location-filter");
   const currentValue = select.value;
 
-  // Clear existing options except "All Locations"
   select.innerHTML = '<option value="all">All Locations</option>';
 
   locations.forEach((location) => {
@@ -260,13 +241,11 @@ function updateLocationFilter(locations) {
     select.appendChild(option);
   });
 
-  // Restore selection if still valid
   if (currentValue !== "all") {
     select.value = currentValue;
   }
 }
 
-// Performance monitoring functions
 let performanceChart = null;
 
 function initPerformanceChart() {
@@ -349,7 +328,6 @@ function initPerformanceChart() {
 }
 
 function updatePerformanceMonitoring() {
-  // Fetch current performance status
   fetch("/api/performance/status")
     .then((response) => response.json())
     .then((data) => {
@@ -359,7 +337,6 @@ function updatePerformanceMonitoring() {
       console.error("Error fetching performance status:", error)
     );
 
-  // Fetch performance trends
   fetch("/api/performance/trends?hours=24")
     .then((response) => response.json())
     .then((data) => {
@@ -369,7 +346,6 @@ function updatePerformanceMonitoring() {
       console.error("Error fetching performance trends:", error)
     );
 
-  // Fetch recent performance alerts
   fetch("/api/performance/alerts?limit=10")
     .then((response) => response.json())
     .then((data) => {
@@ -391,7 +367,6 @@ function updatePerformanceMetrics(data) {
     data.disk_percent?.toFixed(1) || 0
   }%`;
 
-  // Update status indicators
   updatePerformanceStatus("cpu-status", data.cpu_percent, [80, 95]);
   updatePerformanceStatus("memory-status", data.memory_percent, [85, 95]);
   updatePerformanceStatus("disk-status", data.disk_percent, [90, 98]);
@@ -425,7 +400,7 @@ function updatePerformanceChart(data) {
     console.error("No timestamps in data", data);
     return;
   }
-  // Defensive: check all arrays are same length
+
   const n = data.timestamps.length;
   const arrays = [data.cpu, data.memory, data.disk, data.queue_sizes];
   const names = ["cpu", "memory", "disk", "queue_sizes"];
@@ -440,7 +415,7 @@ function updatePerformanceChart(data) {
       );
     }
   });
-  // Format timestamps
+
   const labels = data.timestamps.map((timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], {
@@ -489,14 +464,12 @@ function updatePerformanceAlertsTable(alerts) {
     .join("");
 }
 
-// Initialize on page load
 document.addEventListener("DOMContentLoaded", function () {
   initCharts();
   initPerformanceChart();
   updateDashboard();
   updatePerformanceMonitoring();
 
-  // Auto-refresh every 30 seconds
   setInterval(() => {
     updateDashboard();
     updatePerformanceMonitoring();

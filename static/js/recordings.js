@@ -94,7 +94,7 @@ function displayRecordings() {
             }
           </div>
           <div class="recording-info">
-            <div class="recording-title">${recording.filename}</div>
+            <div class="recording-title">${escapeHtml(recording.filename)}</div>
             <div class="recording-details">
               <div><i class="fas fa-clock"></i> ${startTime.toLocaleString()}</div>
               <div><i class="fas fa-stopwatch"></i> Duration: ${formatDuration(

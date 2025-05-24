@@ -7,7 +7,6 @@ anyio==4.9.0
 argcomplete==3.6.2
 asgiref==3.8.1
 asttokens==3.0.0
-asyncio==3.4.3
 attrs==25.3.0
 bidict==0.23.1
 blinker==1.9.0

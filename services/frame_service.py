@@ -35,6 +35,7 @@ class FrameService:
         self.processing_thread = None
         self.stop_event = threading.Event()
         self.is_processing = False
+        self._processing_lock = threading.Lock()
 
     def process_incoming_frame(self, frame_data):
         """
@@ -185,7 +186,8 @@ class FrameService:
         if self.processing_thread and self.processing_thread.is_alive():
             self.processing_thread.join(timeout=2)
 
-        self.is_processing = False
+        with self._processing_lock:
+            self.is_processing = False
 
         # Clear queues
         while not self.incoming_frame_queue.empty():
@@ -259,6 +261,8 @@ class FrameService:
         # Indicate if behavior was detected (e.g., "Panicked")
         if any("Panicked" in behavior for behavior in analysis["behaviors"]):
             # Save frame if panicked behavior is detected
+            # Ensure save directory exists
+            os.makedirs(config.SAVE_DIR, exist_ok=True)
             file_path = os.path.join(
                 config.SAVE_DIR, f"panicked_surveillance_{int(time.time())}.jpg"
             )
@@ -326,4 +330,6 @@ class FrameService:
     def get_frame(self):
         """Deprecated: Not applicable for browser-based camera."""
         print("Warning: get_frame() is deprecated for browser-based camera.")
+        return False, None
+        return False, None
         return False, None

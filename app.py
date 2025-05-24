@@ -24,7 +24,13 @@ app.register_blueprint(auth_bp)
 
 setup_socketio_events(socketio)
 
-performance_monitor.start_monitoring()
+try:
+    performance_monitor.start_monitoring()
+except Exception as e:
+    app.logger.error(f"Failed to start performance monitoring: {e}")
+    # Decide whether to continue without monitoring or fail fast
+    if not DEBUG:
+        raise
 
 
 @app.route("/health")
