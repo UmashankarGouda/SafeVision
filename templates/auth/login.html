@@ -1,0 +1,45 @@
+{% extends 'layout.html' %} {% block title %}Admin Login - SafeVision{% endblock
+%} {% block css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/login.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="login-container">
+  <div class="login-card">
+    <h1><i class="fas fa-shield-alt"></i> Admin Access</h1>
+    <p>Enter the admin password to access settings</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %} {% endif %} {% endwith %}
+
+    <form method="POST">
+      <input type="hidden" name="next" value="{{ next }}" />
+
+      <div class="form-group">
+        <label for="password"> <i class="fas fa-lock"></i> Password </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          placeholder="Enter admin password"
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button type="submit" class="login-btn">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+    </form>
+
+    <a href="{{ url_for('pages.home') }}" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+  </div>
+</div>
+
+<script src="{{url_for('static', filename='js/login.js')}}"></script>
+{% endblock %}

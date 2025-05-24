@@ -1,5 +1,4 @@
 window.addEventListener("load", function () {
-
   // Show Hero Section
   const hero = document.getElementById("hero");
   hero.style.opacity = "1";
@@ -12,7 +11,6 @@ window.addEventListener("load", function () {
   }
   // Fade in nav and footer separately after preloader is removed
   document.querySelector("nav").style.opacity = "1";
-  document.querySelector("footer").style.opacity = "1";
   // Apply animations correctly
   applyAnimation(".hero-content", "showContent 1s 0s ease-in-out forwards");
   applyAnimation(
@@ -24,4 +22,3 @@ window.addEventListener("load", function () {
     "showContent 1.2s 0.7s ease-in-out forwards"
   );
 });
-

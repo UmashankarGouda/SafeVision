@@ -1,0 +1,266 @@
+.analytics-container {
+  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.analytics-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 30px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: white;
+  border-radius: 10px;
+}
+
+.analytics-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.analytics-header p {
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.dashboard-card {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.dashboard-card h3 {
+  color: #1a1a2e;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #00b5e2;
+  margin-bottom: 10px;
+}
+
+.metric-label {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.metric-change {
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
+
+.metric-change.positive {
+  color: #28a745;
+}
+
+.metric-change.negative {
+  color: #dc3545;
+}
+
+.chart-container {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.chart-container h3 {
+  color: #1a1a2e;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #00b5e2;
+  padding-bottom: 10px;
+}
+
+.chart-wrapper {
+  height: 400px;
+  position: relative;
+}
+
+.chart-small {
+  height: 300px;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.alerts-table {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.alerts-table h3 {
+  color: #1a1a2e;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #00b5e2;
+  padding-bottom: 10px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  color: black;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.severity-high {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.severity-medium {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+.severity-low {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-active {
+  background-color: #28a745;
+}
+
+.status-alert {
+  background-color: #dc3545;
+}
+
+.status-warning {
+  background-color: #ffc107;
+}
+
+.filters {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #00b5e2;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0082a8;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.loading i {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #00b5e2;
+}
+
+@media (max-width: 768px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .analytics-container {
+    padding: 10px;
+  }
+
+  .dashboard-card {
+    padding: 15px;
+  }
+
+  .chart-container {
+    padding: 15px;
+  }
+}

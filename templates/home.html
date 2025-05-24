@@ -23,9 +23,12 @@
     </h1>
   </div>
 </section>
-
-{% include 'components/video-feed.html' %}
-{% include 'components/confidence-meter.html' %}
+<div class="video-feed card">
+  {% include 'components/video-feed.html' %}
+</div>
+<div class="confidence-meter card">
+  {% include 'components/confidence-meter.html' %}
+</div>
 {% endblock %}
 
 {% block scripts %}

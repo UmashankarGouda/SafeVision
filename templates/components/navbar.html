@@ -3,10 +3,18 @@
     <div class="logo">
       <a href="{{ url_for('pages.home') }}">SafeVision</a>
     </div>
+
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+      <i class="fas fa-bars"></i>
+    </button>
+
     <div class="nav-links">
-      <ul>
+      <ul id="nav-menu">
         <li><a href="{{ url_for('pages.home') }}">Home</a></li>
         <li><a href="{{ url_for('pages.about') }}">About</a></li>
+        <li><a href="{{ url_for('analytics.analytics') }}">Analytics</a></li>
+        <li><a href="{{ url_for('pages.recordings') }}">Recordings</a></li>
+        <li><a href="{{ url_for('pages.settings') }}">Settings</a></li>
       </ul>
     </div>
   </div>
