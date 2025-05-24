@@ -1,0 +1,195 @@
+{% extends 'layout.html' %} {% block title %}Analytics Dashboard - SafeVision{%
+endblock %} {% block css %}
+<link
+  rel="stylesheet"
+  href="{{url_for('static', filename='css/analytics.css')}}"
+/>
+{% endblock %} {% block content %}
+<div class="analytics-container">
+  <div class="analytics-header">
+    <h1><i class="fas fa-chart-line"></i> Analytics Dashboard</h1>
+    <p>Comprehensive insights into system performance and detection patterns</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <label for="time-range">Time Range:</label>
+      <select id="time-range">
+        <option value="24h">Last 24 Hours</option>
+        <option value="7d" selected>Last 7 Days</option>
+        <option value="30d">Last 30 Days</option>
+        <option value="90d">Last 90 Days</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="location-filter">Location:</label>
+      <select id="location-filter">
+        <option value="all">All Locations</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="severity-filter">Severity:</label>
+      <select id="severity-filter">
+        <option value="all">All Severities</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="updateDashboard()">
+      <i class="fas fa-sync"></i> Refresh
+    </button>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <h3><i class="fas fa-exclamation-triangle"></i> Total Alerts</h3>
+      <div class="metric-value" id="total-alerts">0</div>
+      <div class="metric-label">All time</div>
+      <div class="metric-change" id="alerts-change">+0% vs last period</div>
+    </div>
+    <div class="dashboard-card">
+      <h3><i class="fas fa-users"></i> Active Sessions</h3>
+      <div class="metric-value" id="active-sessions">0</div>
+      <div class="metric-label">Currently online</div>
+      <div class="metric-change" id="sessions-change">Real-time</div>
+    </div>
+    <div class="dashboard-card">
+      <h3><i class="fas fa-camera"></i> Frames Processed</h3>
+      <div class="metric-value" id="frames-processed">0</div>
+      <div class="metric-label">Total frames</div>
+      <div class="metric-change" id="frames-change">+0% vs last period</div>
+    </div>
+    <div class="dashboard-card">
+      <h3><i class="fas fa-chart-line"></i> Detection Rate</h3>
+      <div class="metric-value" id="detection-rate">0%</div>
+      <div class="metric-label">Average accuracy</div>
+      <div class="metric-change" id="accuracy-change">+0% vs last period</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-container">
+      <h3><i class="fas fa-map-marker-alt"></i> Alerts by Location</h3>
+      <div class="chart-wrapper chart-small">
+        <canvas id="location-chart"></canvas>
+      </div>
+    </div>
+    <div class="chart-container">
+      <h3><i class="fas fa-tags"></i> Alert Categories</h3>
+      <div class="chart-wrapper chart-small">
+        <canvas id="category-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Monitoring Section -->
+  <div class="performance-monitoring">
+    <h3><i class="fas fa-tachometer-alt"></i> System Performance Monitoring</h3>
+
+    <!-- Performance Metrics Grid -->
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <h3><i class="fas fa-microchip"></i> CPU Usage</h3>
+        <div class="metric-value" id="cpu-usage">0%</div>
+        <div class="metric-label">Current usage</div>
+        <div class="metric-change" id="cpu-status">Normal</div>
+      </div>
+      <div class="dashboard-card">
+        <h3><i class="fas fa-memory"></i> Memory Usage</h3>
+        <div class="metric-value" id="memory-usage">0%</div>
+        <div class="metric-label">RAM utilization</div>
+        <div class="metric-change" id="memory-status">Normal</div>
+      </div>
+      <div class="dashboard-card">
+        <h3><i class="fas fa-hdd"></i> Disk Usage</h3>
+        <div class="metric-value" id="disk-usage">0%</div>
+        <div class="metric-label">Storage used</div>
+        <div class="metric-change" id="disk-status">Normal</div>
+      </div>
+      <div class="dashboard-card">
+        <h3><i class="fas fa-list"></i> Queue Status</h3>
+        <div class="metric-value" id="queue-size">0</div>
+        <div class="metric-label">Pending frames</div>
+        <div class="metric-change" id="queue-status">Normal</div>
+      </div>
+    </div>
+
+    <!-- Performance Trends Chart -->
+    <div class="chart-container">
+      <h3>
+        <i class="fas fa-chart-line"></i> Performance Trends (Last 24 Hours)
+      </h3>
+      <div class="chart-wrapper">
+        <canvas id="performance-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Recent Performance Alerts -->
+    <div class="alerts-table">
+      <h3>
+        <i class="fas fa-exclamation-circle"></i> Recent Performance Alerts
+      </h3>
+      <div class="table-responsive">
+        <table id="performance-alerts-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Message</th>
+              <th>Value</th>
+              <th>Threshold</th>
+              <th>Severity</th>
+            </tr>
+          </thead>
+          <tbody id="performance-alerts-tbody">
+            <tr>
+              <td
+                colspan="6"
+                class="text-center"
+                style="padding: 20px; color: #666"
+              >
+                No performance alerts in the last 24 hours
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Alerts Table -->
+    <div class="alerts-table">
+      <h3><i class="fas fa-bell"></i> Recent Alerts</h3>
+      <div class="table-responsive">
+        <table id="alerts-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Location</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Severity</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="alerts-tbody">
+            <tr>
+              <td colspan="6" class="loading">
+                <i class="fas fa-spinner fa-spin"></i><br />
+                Loading recent alerts...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endblock %} {% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{url_for('static', filename='js/analytics.js')}}"></script>
+  </script>
+  {% endblock %}
+</div>

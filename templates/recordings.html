@@ -1,0 +1,74 @@
+{% extends 'layout.html' %} {% block title %}Recordings - SafeVision{%
+endblock%} {% block css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/recordings.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="recordings-container">
+  <div class="recordings-header">
+    <h1><i class="fas fa-video"></i> Video Recordings</h1>
+    <p>Manage and download surveillance video recordings</p>
+  </div>
+
+  <!-- Storage Information -->
+  <div class="storage-info">
+    <h3><i class="fas fa-hdd"></i> Storage Information</h3>
+    <div class="controls-grid">
+      <div class="control-card">
+        <h3>Total Recordings</h3>
+        <div class="metric-value" id="total-recordings">0</div>
+        <div class="metric-label">Video files</div>
+      </div>
+      <div class="control-card">
+        <h3>Storage Used</h3>
+        <div class="metric-value" id="storage-used">0 MB</div>
+        <div class="metric-label">Total size</div>
+      </div>
+      <div class="control-card">
+        <h3>Free Space</h3>
+        <div class="metric-value" id="free-space">0 GB</div>
+        <div class="metric-label">Available</div>
+      </div>
+      <div class="control-card">
+        <h3>Disk Usage</h3>
+        <div class="metric-value" id="disk-usage">0%</div>
+        <div class="metric-label">Total disk</div>
+      </div>
+    </div>
+
+    <div class="storage-bar">
+      <div class="storage-used" id="storage-bar" style="width: 0%"></div>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px">
+      <button class="btn btn-danger" onclick="cleanupRecordings()">
+        <i class="fas fa-trash"></i> Cleanup Old Recordings
+      </button>
+      <button class="btn btn-secondary" onclick="refreshRecordings()">
+        <i class="fas fa-sync"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Recordings Grid -->
+  <div id="recordings-loading" class="loading">
+    <i class="fas fa-spinner"></i>
+    <p>Loading recordings...</p>
+  </div>
+
+  <div id="recordings-content" style="display: none">
+    <div class="recordings-grid" id="recordings-grid">
+      <!-- Recordings will be loaded here -->
+    </div>
+
+    <div id="no-recordings" class="no-recordings" style="display: none">
+      <i class="fas fa-video-slash"></i>
+      <h3>No recordings found</h3>
+      <p>Start a surveillance session to begin recording videos.</p>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="{{url_for('static', filename='js/recordings.js')}}"></script>
+{% endblock %}
