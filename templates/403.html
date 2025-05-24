@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Access Forbidden - SafeVision</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/common.css') }}"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/403.css') }}"
+    />
+  </head>
+  <body>
+    <div class="error-container">
+      <h1 class="error-code">403</h1>
+      <h2 class="error-message">Access Forbidden</h2>
+      <p class="error-description">
+        You don't have permission to access this resource. This area requires
+        authentication.
+      </p>
+
+      <div class="action-buttons">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+        <a href="{{ url_for('pages.home') }}" class="btn btn-secondary"
+          >Go Home</a
+        >
+      </div>
+    </div>
+  </body>
+</html>

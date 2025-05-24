@@ -1,14 +1,10 @@
 nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 1rem 5%;
   background-color: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(0px);
-  -webkit-backdrop-filter: blur(0px);
   border-bottom: 1px solid rgba(0, 0, 0, 0);
   backdrop-filter: blur(8px);
-  position: fixed;
+  -webkit-backdrop-filter: blur(8px);
+  position: sticky;
   width: 100%;
   top: 0;
   z-index: 1000;
@@ -17,14 +13,15 @@ nav {
 
 .nav-container {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
-  justify-content: space-between;
+  margin: 0;
   align-items: center;
-  padding: 0 20px;
 }
-
+.nav-container > .logo {
+  display: flex;
+  align-items: center;
+  margin-right: auto;
+}
 .logo img {
   height: 50px;
   width: auto;
@@ -78,12 +75,10 @@ body {
 
 .nav-links > ul {
   display: flex;
-  gap: 20px;
 }
 .nav-links > ul > li {
   list-style: none;
   display: inline-block;
-  margin: 0 10px;
   padding: 10px 20px;
 }
 .nav-links > ul > li > a {
@@ -91,4 +86,286 @@ body {
   color: white;
   font-size: 1.2rem;
   transition: color 0.3s ease-in-out;
+}
+
+/* Mobile Responsive Design */
+@media screen and (max-width: 768px) {
+  /* Navigation adjustments for mobile */
+
+  .nav-links > ul {
+    flex-direction: column;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 20px 0;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out, opacity 0.3s, visibility 0.3s;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1050;
+    pointer-events: none;
+  }
+
+  .nav-links > ul.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .nav-links > ul > li {
+    margin: 0;
+    padding: 15px 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-links > ul > li > a {
+    font-size: 1.1rem;
+  }
+
+  /* Mobile menu toggle button */
+  .mobile-menu-toggle {
+    display: block;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1100;
+  }
+
+  /* Hide desktop navigation on mobile */
+  .nav-links {
+    position: relative;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .mobile-menu-toggle {
+    display: none;
+  }
+  .nav-links > ul {
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: static !important;
+    flex-direction: row !important;
+    background: none !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* Mobile-specific video feed adjustments */
+@media screen and (max-width: 768px) {
+  .video-container {
+    margin: 80px 10px 20px 10px;
+  }
+
+  #video-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  #camera-controls {
+    position: static !important;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  #camera-controls button {
+    margin: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+
+  #camera-status,
+  #analysis-info {
+    position: static !important;
+    margin: 10px 0;
+    text-align: center;
+    max-width: 100% !important;
+  }
+}
+
+/* Mobile dashboard and cards */
+@media screen and (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin: 20px 10px;
+  }
+
+  .dashboard-card {
+    padding: 20px 15px;
+  }
+
+  .chart-container {
+    margin: 20px 10px;
+    overflow-x: auto;
+  }
+
+  .chart-wrapper {
+    min-width: 300px;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table-responsive table {
+    min-width: 600px;
+  }
+}
+
+/* Mobile analytics page */
+@media screen and (max-width: 768px) {
+  .analytics-container {
+    padding: 10px;
+  }
+
+  .analytics-header {
+    padding: 20px 15px;
+    margin-bottom: 20px;
+  }
+
+  .analytics-header h1 {
+    font-size: 2rem;
+  }
+
+  .filters {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filter-group {
+    flex: 1;
+  }
+}
+
+/* Mobile recordings page */
+@media screen and (max-width: 768px) {
+  .recordings-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .recording-card {
+    padding: 15px;
+  }
+
+  .recording-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .recording-actions button {
+    width: 100%;
+  }
+}
+
+/* Mobile settings page */
+@media screen and (max-width: 768px) {
+  .settings-container {
+    padding: 10px;
+  }
+
+  .settings-card {
+    padding: 20px 15px;
+  }
+
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .slider-container {
+    margin: 15px 0;
+  }
+}
+
+/* Video Feed Loading States and Status Indicators */
+.video-container {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#video-canvas {
+  background: #1a1a1a;
+  border-radius: 8px;
+  transition: opacity 0.3s ease;
+}
+
+#camera-status {
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+#camera-status.status-active {
+  background: rgba(76, 175, 80, 0.8) !important;
+  border-left: 4px solid #4caf50;
+}
+
+#camera-status.status-sending {
+  background: rgba(33, 150, 243, 0.8) !important;
+  border-left: 4px solid #2196f3;
+}
+
+#camera-status.status-warning {
+  background: rgba(255, 152, 0, 0.8) !important;
+  border-left: 4px solid #ff9800;
+}
+
+#camera-status.status-error {
+  background: rgba(244, 67, 54, 0.8) !important;
+  border-left: 4px solid #f44336;
+}
+
+#analysis-info {
+  font-family: "Courier New", monospace;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+/* Loading Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Camera Controls Enhancement */
+#camera-controls button {
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#camera-controls button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+#camera-controls button:active {
+  transform: translateY(0);
 }
