@@ -1,4 +1,4 @@
-let trendChart, locationChart, categoryChart;
+let locationChart, categoryChart;
 
 function initCharts() {
   const locationCtx = document
