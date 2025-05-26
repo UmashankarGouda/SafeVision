@@ -1,8 +1,15 @@
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, session, request
 import sqlite3
 from datetime import datetime, timedelta
+from flask_login import login_required, current_user
+from services.recording_service import RecordingService
 
 analytics_bp = Blueprint('analytics', __name__)
+
+recording_services = {}
+
+def get_user_id():
+    return str(current_user.get_id()) if current_user.is_authenticated else session.get('user_id')
 
 @analytics_bp.route('/analytics')
 def analytics():
@@ -54,3 +61,29 @@ def analytics_data():
         'trend': trend_data,
         'recent_alerts': recent_alerts
     })
+
+@analytics_bp.route('/api/recording/start', methods=['POST'])
+@login_required
+def start_recording():
+    user_id = get_user_id()
+    recording_services[user_id] = RecordingService(user_id)
+    recording_services[user_id].start()
+    return jsonify({'status': 'started'})
+
+@analytics_bp.route('/api/recording/stop', methods=['POST'])
+@login_required
+def stop_recording():
+    user_id = get_user_id()
+    service = recording_services.get(user_id)
+    if not service:
+        return jsonify({'error': 'No active recording'}), 400
+    filename = service.stop()
+    return jsonify({'status': 'stopped', 'filename': filename})
+
+@analytics_bp.route('/api/recording/list', methods=['GET'])
+@login_required
+def list_recordings():
+    user_id = get_user_id()
+    service = recording_services.get(user_id) or RecordingService(user_id)
+    files = service.list_recordings()
+    return jsonify({'recordings': files})
