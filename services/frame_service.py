@@ -6,6 +6,7 @@ import cv2
 import time
 import config
 from models.integrated_surveillance_system import IntegratedSurveillanceSystem
+from services.recording_service import RecordingService
 
 class FrameService:
     def __init__(self, save_interval=None):
@@ -158,3 +159,10 @@ class FrameService:
                 
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+            
+            # Example: In your frame processing logic, after AI annotation
+            # Add this where frames are processed and annotated
+            user_id = get_user_id()  # Use session or current_user
+            if user_id in recording_services and recording_services[user_id].recording:
+                # Only queue annotated frames
+                recording_services[user_id].add_frame(annotated_frame)
