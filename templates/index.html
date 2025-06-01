@@ -8,6 +8,7 @@
 <body>
     <h1>SafeVision: Nudity Detection</h1>
     <form method="post" enctype="multipart/form-data" action="{{ url_for('processing.upload_file') }}" onsubmit="return validateFile()">
+        <label for="fileInput">Choose a file to upload:</label>
         <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.mp4,.avi,.mov">
         <button type="submit">Upload and Process</button>
     </form>
