@@ -38,6 +38,8 @@
 
     <main>{% block content %}{% endblock %}</main>
 
+    {% include 'components/recording-controls.html' %}
+
     {% block footer %}{% endblock %}
 
     <!-- Common Scripts -->
@@ -45,3 +47,8 @@
     {% block scripts %}{% endblock %}
   </body>
 </html>
+
+<form method="post" action="{{ url_for('your_post_route') }}">
+    {{ csrf_token() }}
+    <!-- form fields here -->
+</form>

@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block title %}Add Subject{% endblock %}
+{% block content %}
+<div class="form-container">
+  <h2>Add Subject</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div>
+      {{ form.name.label }}<br>
+      {{ form.name(size=32) }}
+    </div>
+    <div>
+      {{ form.description.label }}<br>
+      {{ form.description(size=64) }}
+    </div>
+    <div>
+      {{ form.submit(class="btn btn-primary") }}
+    </div>
+  </form>
+</div>
+{% endblock %}
