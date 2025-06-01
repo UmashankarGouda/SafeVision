@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SafeVision - Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Processing Complete</h1>
+    <div class="result">
+        {% if filename.endswith(('.jpg', '.png', '.jpeg')) %}
+            <img src="{{ url_for('processing.download', filename=filename) }}" alt="Processed Image">
+        {% elif filename.endswith(('.mp4', '.avi', '.mov')) %}
+            <video controls>
+                <source src="{{ url_for('processing.download', filename=filename) }}" type="video/{{ filename.split('.')[-1] }}">
+                Your browser does not support the video tag.
+            </video>
+        {% endif %}
+        <p><a href="{{ url_for('processing.download', filename=filename) }}">Download Processed File</a></p>
+        <p><a href="{{ url_for('processing.index') }}">Process Another File</a></p>
+    </div>
+</body>
+</html>

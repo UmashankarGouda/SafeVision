@@ -14,6 +14,17 @@ dependencies = [
     "transformers (>=4.51.3,<5.0.0)"
 ]
 
+[tool.poetry]
+name = "safevision"
+version = "0.1.0"
+description = "A tool for detecting and blurring nudity in videos and images"
+authors = ["Your Name <your.email@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flask = "^2.0.0"
+opencv-python = "^4.5.5"
+werkzeug = "^2.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

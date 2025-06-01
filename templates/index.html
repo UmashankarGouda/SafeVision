@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SafeVision - Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>SafeVision: Nudity Detection</h1>
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('processing.upload_file') }}" onsubmit="return validateFile()">
+        <label for="fileInput">Choose a file to upload:</label>
+        <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.mp4,.avi,.mov">
+        <button type="submit">Upload and Process</button>
+    </form>
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
