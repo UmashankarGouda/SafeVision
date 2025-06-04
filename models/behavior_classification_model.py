@@ -6,9 +6,16 @@ import numpy as np
 from PIL import Image
 from transformers import pipeline
 import config
+import mediapipe as mp
+
+
 
 class BehaviorClassificationModel:
-    def __init__(self):
+    def __init__(self,enable_pose_detection=True):
+        self.enable_pose_detection = enable_pose_detection
+        if self.enable_pose_detection:
+            self.mp_pose = mp.solutions.pose
+            self.pose = self.mp_pose.Pose(static_image_mode=False, model_complexity=1)
         """
         Initialize the behavior classification model.
         """
@@ -104,6 +111,37 @@ class BehaviorClassificationModel:
                 hx, hy, hw, hh = cv2.boundingRect(cnt)
                 if hy < (y2 - y1) // 2:  # If hand is in upper half of person region
                     behaviors.append("Hands Raised")
+        """
+        Detects sitting, standing, and hand-raising based on body landmarks
+        using MediaPipe Pose Estimation.
+        """
+        # Pose-based posture detection
+        if self.enable_pose_detection:      
+            try:
+                pose_result = self.pose.process(frame_rgb)
+                if pose_result.pose_landmarks:
+                    landmarks = pose_result.pose_landmarks.landmark
+
+                    # Basic sitting vs standing detection using hip to knee y-distance
+                    hip = landmarks[self.mp_pose.PoseLandmark.LEFT_HIP]
+                    knee = landmarks[self.mp_pose.PoseLandmark.LEFT_KNEE]
+                    if abs(hip.y - knee.y) < 0.1:
+                        behaviors.append("Sitting")
+                    else:
+                        behaviors.append("Standing")
+
+                    # Raised hands detection using wrist < nose
+                    lwrist = landmarks[self.mp_pose.PoseLandmark.LEFT_WRIST]
+                    rwrist = landmarks[self.mp_pose.PoseLandmark.RIGHT_WRIST]
+                    nose = landmarks[self.mp_pose.PoseLandmark.NOSE]
+
+                    if lwrist.y < nose.y and rwrist.y < nose.y:
+                        behaviors.append("Both Hands Raised")
+                    elif lwrist.y < nose.y or rwrist.y < nose.y:
+                        behaviors.append("One Hand Raised")
+            except Exception as e:
+                print(f"[Pose Estimation Error] {e}")
+
         
         # Combine ML and rule-based behavior detection
         if ml_behavior == "Panicked" or "Rapid Movement" in behaviors:
